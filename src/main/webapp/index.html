@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <style>
+        body {
+            background-image: url("https://www.slagersvak.biz/images/featured_news/jumbo_1_1.jpg");
+            background-size: cover;
+            background-position: center;        /*  maakt de achtergrond responsive (beweegt mee met de grootte van het scherm) */
+            background-repeat: no-repeat;
+            margin: 0;
+            height: 100vh;
+        }
+
+        .custom-dialog {        /*  maakt het dialoog venster waarin alles staat    */
+            background-color: #FCFBF2;
+            padding: 10% 10%;
+            border-radius: 15px;
+        }
+
+    </style>
+
+    <dialog class="custom-dialog" open>
+
+        <form method="dialog">
+            <h1>Login Vragenlijst </h1>
+            <h2>Jumbo Foodmarkt Leidsche Rijn</h2>
+            <form>
+                <label for="userMail">Emailadres:</label><br>
+                <input type="text" id="userMail" name="userMail"><br>
+                <label for="userPassword">wachtwoord:</label><br>
+                <input type="text" id="userPassword" name="userPassword"><br>
+            </form>
+            <br>
+            <br>
+            <button id="createAccountButton" class="float-left submit-button">account aanmaken</button>
+            <script type="text/javascript">
+                document.getElementById("createAccountButton").onclick = function () {
+                    location.href = "createAccount.html"
+                }
+            </script>
+            <label id="errorLabel"></label>
+        </form>
+    </dialog>
+
+</head>
+<body>
+
+</body>
+</html>

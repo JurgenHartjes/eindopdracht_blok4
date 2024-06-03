@@ -1,0 +1,1 @@
+package nl.hu.bep.shopping.model;

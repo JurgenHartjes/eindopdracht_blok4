@@ -10,4 +10,3 @@ public class JerseyConfig extends ResourceConfig {
         packages("nl.hu.bep.shopping.webservices");
     }
 }
-

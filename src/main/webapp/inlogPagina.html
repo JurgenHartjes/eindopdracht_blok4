@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <style>
+        body {
+            background-image: url("https://www.slagersvak.biz/images/featured_news/jumbo_1_1.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            height: 100vh;
+        }
+
+        .custom-dialog {
+            background-color: #FCFBF2;
+            padding: 10% 10%;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+<dialog class="custom-dialog" open>
+    <form>
+        <h1>Login Vragenlijst</h1>
+        <h2>Jumbo Foodmarkt Leidsche Rijn</h2>
+        <label for="userMail">Emailadres:</label><br>
+        <input type="text" id="userMail" name="userMail"><br>
+        <label for="userPassword">Wachtwoord:</label><br>
+        <input type="text" id="userPassword" name="userPassword"><br>
+        <br><br>
+        <button id="createAccountButton" type="button" class="float-left submit-button">Account Aanmaken</button>
+        <label id="errorLabel"></label>
+    </form>
+</dialog>
+
+<script type="text/javascript">
+    document.getElementById("createAccountButton").onclick = function () {
+        location.href = "/vragenlijst";  // Ensure this is correct and matches the servlet mapping
+    }
+</script>
+</body>
+</html>

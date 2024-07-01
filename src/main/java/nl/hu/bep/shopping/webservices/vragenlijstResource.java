@@ -9,127 +9,82 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet("/vragenlijst")
-public final class vragenlijstResource extends HttpServlet {
+public class vragenlijstResource extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String viewOnlyParam = req.getParameter("viewOnly");
+        boolean viewOnly = Boolean.parseBoolean(viewOnlyParam);
 
-        List<String> questions = new ArrayList<>();
+        String id = req.getParameter("id");
+        log("Received id: " + id);
 
-        Vragenlijst vragenlijst = (Vragenlijst) getServletContext().getAttribute("huidigeVragenlijst");       //haalt de vragenlijst op
+        if (id == null || id.isEmpty()) {
+            resp.getWriter().println("ID parameter is missing");
+            return;
+        }
 
-        if (vragenlijst != null) {      //zeker weten dat er een vragenlijst is gevonden om errors te voorkomen
+        ArrayList<Vragenlijst> vragenlijsten = (ArrayList<Vragenlijst>) getServletContext().getAttribute("vragenlijsten");
+        Vragenlijst vragenlijst = null;
 
-            for (Vraag vraag : vragenlijst.getVragen()) {       //loopt door alle vragen heen
-
-                questions.add(vraag.getVraag());        //haalt voor elke Vraag de vraag op, zodat deze kan worden weergegeven
-
+        if (vragenlijsten != null) {
+            for (Vragenlijst v : vragenlijsten) {
+                if (v.getId().equals(id)) {
+                    vragenlijst = v;
+                    break;
+                }
             }
+        }
 
-        } else  {   System.out.println("geen vragenlijst gevonden"   );    }
-
-        req.setAttribute("questions", questions);       //zet de variabele "questions"
-        req.getRequestDispatcher("/vragenlijst.jsp").forward(req, resp);        //zorgt dat het bestand vragenlijst.jsp wordt geopend
-
+        if (vragenlijst != null) {
+            log("Found vragenlijst: " + vragenlijst);
+            getServletContext().setAttribute("huidigeVragenlijst", vragenlijst);
+            List<Vraag> questions = vragenlijst.getVragen();
+            req.setAttribute("questions", questions);
+            req.getRequestDispatcher("/vragenlijst.jsp").forward(req, resp);
+        } else {
+            resp.getWriter().println("Geen vragenlijst gevonden");
+            log("No vragenlijst found for id: " + id);
+        }
     }
-
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Vragenlijst vragenlijst = (Vragenlijst) getServletContext().getAttribute("huidigeVragenlijst");
+        log("get huidigeVragenlijst = " + vragenlijst);
 
-        resp.setContentType("text/html;charset=UTF-8");
-
-        Vragenlijst vragenlijst = (Vragenlijst) getServletContext().getAttribute("huidigeVragenlijst");       //haalt de huidige vragenlijst op
-
-        if (vragenlijst != null) {      //zeker weten dat er een vragenlijst is gevonden om errors te voorkomen
-
-            resp.getWriter().println("<html><body>");       //beginnen met het opbouwen van een "ingeleverd" HTML
-            resp.getWriter().println("<h1>Form Submitted</h1>");
-
-            int questionIndex = 1;      //houdt het vragennummer bij
-
-            for (Vraag vraag : vragenlijst.getVragen()) {       //loopt door alle vragen uit de vragenlijst
-
-                String parameterName = "vraag" + questionIndex;
-                String answer = req.getParameter(parameterName);        //haalt het antwoord op
-                resp.getWriter().println("<p>" + questionIndex + ". " + vraag.getVraag() + ": " + answer + "</p>");     //geeft voor elke vraag het ingevulde antwoord weer
-
-
-                vraag.setAntwoord(answer);
-
-                questionIndex++;        //zorgt dat het vraagnummer wordt aangepast voor de volgende vraag
-            }
-
-            Gebruiker gebruiker = (Gebruiker) getServletContext().getAttribute("huidigeGebruiker");       //haalt de huidige gebruiker op
-            vragenlijst.setMomentVanInvoer();
-
-            if (gebruiker != null) {
-
-                gebruiker.ingevuldeVragenlijstToevoegen(vragenlijst);
-                File file = new File("src/main/java/nl/hu/bep/shopping/filledForms/user" + gebruiker.getKlantenNr() + ".obj"); //geeft het pad naar de bestemde locatie van het bestand aan
-
-                boolean result;
-
-                try {
-
-                    result = file.createNewFile();  //maakt een nieuwe bestand aan
-
-                    if(result)  {       //als het bestand nog niet bestond geeft het aan dat deze is aangemaakt
-
-                        System.out.println("file created "+file.getCanonicalPath());
-
-                    }
-                    else {
-
-                        System.out.println("File already exist at location: "+file.getCanonicalPath());     //anders geeft het aan dat deze al bestond
-
-                    }
-
-                }
-
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                try (OutputStream os = Files.newOutputStream(Path.of(file.toURI()));
-
-                     ObjectOutputStream oos = new ObjectOutputStream(os)) {
-                     oos.writeObject(gebruiker);        //Schrijft alle informatie over de gebruiker naar een bestand
-
-                } catch (IOException e) {
-
-                    e.printStackTrace();
-
-                }
-
-
+        int i = 1;
+        for (Vraag vraag : vragenlijst.getVragen()) {
+            if (vraag.getVraagtype().equals("vijfSterren")) {
+                String sterrenRating = req.getParameter("starRating" + i);
+                vraag.setAntwoord(sterrenRating);
+                System.out.println("Sterren antwoord voor vraag " + i + ": " + sterrenRating);
             } else {
-
-                System.out.println("Geen gebruiker gevonden");
-
+                String antwoord = req.getParameter("vraag" + i);
+                vraag.setAntwoord(antwoord);
+                System.out.println("Tekst antwoord voor vraag " + i + ": " + antwoord);
             }
-
-            resp.getWriter().println("</body></html>");     //beindigd het HTML bestand
-
-        } else {
-
-            resp.getWriter().println("<html><body>");       //voor het geval de vragenlijst niet gevonden wordt
-            resp.getWriter().println("<h1>Error</h1>");
-            resp.getWriter().println("<p>Geen vragenlijst gevonden</p>");
-            resp.getWriter().println("</body></html>");
-
+            i++;
         }
 
+        Gebruiker gebruiker = (Gebruiker) req.getSession().getAttribute("huidigeGebruiker");
+
+        if (vragenlijst != null && gebruiker != null) {
+            gebruiker.addIngevuldeLijst(vragenlijst);
+            resp.sendRedirect("/overzicht.jsp");
+        } else {
+            resp.getWriter().println("<html><body>");
+            resp.getWriter().println("<h1>Error</h1>");
+            resp.getWriter().println("<p>Geen vragenlijst of gebruiker gevonden</p>");
+            resp.getWriter().println("</body></html>");
+        }
     }
 
 }

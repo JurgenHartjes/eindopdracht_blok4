@@ -1,0 +1,18 @@
+[
+  {
+    "naam": "Jurgen Hartjes",
+    "mailAdres": "jurgen.hartjes@student.hu.nl",
+    "telefoonnummer": "0612345678",
+    "wachtwoord": "ww",
+    "klantenNr": "12345",
+    "ingevuldeLijsten": []
+  },
+  {
+    "naam": "test",
+    "mailAdres": "test@gmail.com",
+    "telefoonnummer": "123",
+    "wachtwoord": "test",
+    "klantenNr": "123",
+    "ingevuldeLijsten": []
+  }
+]

@@ -19,25 +19,45 @@
             border-radius: 15px;
         }
     </style>
+    <script>
+        // Function to get query parameters from URL
+        function getQueryParams() {
+            let params = {};
+            window.location.search.substring(1).split("&").forEach(pair => {
+                let [key, value] = pair.split("=");
+                params[key] = decodeURIComponent(value);
+            });
+            return params;
+        }
+
+        // Show alert if error query parameter is present
+        window.onload = function() {
+            let params = getQueryParams();
+            if (params['error'] === 'true') {
+                alert('De combinatie van e-mail en wachtwoord is onjuist. Probeer het opnieuw.');
+            }
+        };
+    </script>
 </head>
 <body>
 <dialog class="custom-dialog" open>
-    <form>
+    <form method="post" action="/logMeIn">
         <h1>Login Vragenlijst</h1>
         <h2>Jumbo Foodmarkt Leidsche Rijn</h2>
         <label for="userMail">Emailadres:</label><br>
         <input type="text" id="userMail" name="userMail"><br>
         <label for="userPassword">Wachtwoord:</label><br>
-        <input type="text" id="userPassword" name="userPassword"><br>
+        <input type="password" id="userPassword" name="userPassword"><br>
         <br><br>
-        <button id="createAccountButton" type="button" class="float-left submit-button">Account Aanmaken</button>
+        <button type="submit" id="loginButton">Inloggen</button>
+        <button type="button" id="createAccountButton">Account Aanmaken</button>
         <label id="errorLabel"></label>
     </form>
 </dialog>
 
 <script type="text/javascript">
     document.getElementById("createAccountButton").onclick = function () {
-        location.href = "/vragenlijst";  // Ensure this is correct and matches the servlet mapping
+        location.href = "/createAccount.html";  // Ensure this is correct and matches the servlet mapping
     }
 </script>
 </body>

@@ -1,43 +1,143 @@
 package nl.hu.bep.shopping.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import nl.hu.bep.shopping.database.Connect;
 
-public class Gebruiker {
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Gebruiker implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     protected String naam;
     protected String mailAdres;
     protected String telefoonnummer;
     protected String wachtwoord;
-    protected String klantenNr;
+    protected int klantenNr;
+    private ArrayList<Vragenlijst> ingevuldeLijsten;
+    static ArrayList<Gebruiker> alleGebruikers = new ArrayList<>();
 
-    private ArrayList<Vragenlijst> ingevuldeLijsten; //lijst met objecten van vragenlijsten (waar de vragen en antwoorden aan zijn gekoppeld
+    @JsonCreator
+    public Gebruiker(@JsonProperty("naam") String naam, @JsonProperty("mailAdres") String mailAdres,
+                     @JsonProperty("telefoonnummer") String telefoonnummer, @JsonProperty("wachtwoord") String wachtwoord,
+                     @JsonProperty("klantenNr") int klantenNr) {
+        boolean bestaatAl = false;
+        for (Gebruiker gebruiker : getAlleGebruikers()) {
+            if (gebruiker.getKlantenNr() == klantenNr)  {
+                bestaatAl = true;
+            }
+        }
+        if (!bestaatAl) {
+            this.naam = naam;
+            this.mailAdres = mailAdres;
+            this.telefoonnummer = telefoonnummer;
+            this.wachtwoord = wachtwoord;
+            this.klantenNr = klantenNr;
+            this.ingevuldeLijsten = new ArrayList<>();
+            alleGebruikers.add(this);
+            this.saveGebruiker();
+            System.out.println("klant aangemaakt");
+        } else {System.out.println("klant bestaat al, niet aangemaakt");}
+    }
 
+    public String getNaam() {
+        return naam;
+    }
 
+    public void setNaam(String naam) {
+        this.naam = naam;
+    }
 
-    public Gebruiker(String nm, String mail, String tlfnnr, String ww, String klantenNr)    {       //maakt een gebruiker aan
+    public String getMailAdres() {
+        return mailAdres;
+    }
 
-        this.naam = nm;
-        this.mailAdres = mail;
-        this.telefoonnummer = tlfnnr;
-        this.wachtwoord = ww;
+    public void setMailAdres(String mailAdres) {
+        this.mailAdres = mailAdres;
+    }
+
+    public String getTelefoonnummer() {
+        return telefoonnummer;
+    }
+
+    public void setTelefoonnummer(String telefoonnummer) {
+        this.telefoonnummer = telefoonnummer;
+    }
+
+    public String getWachtwoord() {
+        return wachtwoord;
+    }
+
+    public void setWachtwoord(String wachtwoord) {
+        this.wachtwoord = wachtwoord;
+    }
+
+    public int getKlantenNr() {
+        return klantenNr;
+    }
+
+    public void setKlantenNr(int klantenNr) {
         this.klantenNr = klantenNr;
-        this.ingevuldeLijsten = new ArrayList<>();
     }
 
-    public Vragenlijst getIngevuldeLijst(int index)    {
-        return ingevuldeLijsten.get(index);        //geeft de gevraagde vragenlijst terug
+    public ArrayList<Vragenlijst> getIngevuldeLijsten() {
+        return ingevuldeLijsten;
     }
 
-    public String getKlantenNr()    {return klantenNr;}
+    public void setIngevuldeLijsten(ArrayList<Vragenlijst> ingevuldeLijsten) {
+        this.ingevuldeLijsten = ingevuldeLijsten;
+    }
 
+    public Vragenlijst getIngevuldeLijst(int index) {
+        return ingevuldeLijsten.get(index);
+    }
 
-    public void ingevuldeVragenlijstToevoegen(Vragenlijst vragenlijst)    {      //voegt een beantwoordde lijst toe aan de gebruiker
-        System.out.println("vragenlijst wordt toegevoegd...");
+    public Vragenlijst getIngevuldeLijstById(String ID) {
+        for (Vragenlijst lijst : ingevuldeLijsten) {
+            if (lijst.getId().equals(ID)) {
+                return lijst;
+            }
+        }
+        return null;
+    }
+
+    public void ingevuldeVragenlijstToevoegen(Vragenlijst vragenlijst) {
+        if (this.ingevuldeLijsten == null) {
+            this.ingevuldeLijsten = new ArrayList<>();
+        }
+        this.ingevuldeLijsten.add(vragenlijst);
+    }
+
+    public boolean hasFilledInLastWeek(Vragenlijst vragenlijst) {
+        LocalDateTime now = LocalDateTime.now();
+        for (Vragenlijst ingevulde : ingevuldeLijsten) {
+            if (ingevulde.getId().equals(vragenlijst.getId()) &&
+                    ChronoUnit.DAYS.between(ingevulde.getInvulDatum(), now) < 7) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static ArrayList<Gebruiker> getAlleGebruikers() {
+        return alleGebruikers;
+    }
+
+    public static void setAlleGebruikers(ArrayList<Gebruiker> alleGebruikers) {
+        Gebruiker.alleGebruikers = alleGebruikers;
+    }
+
+    public void saveGebruiker() {
+        System.out.println("Saving gebruiker: " + naam);
+        Connect.saveKlantToDatabase(klantenNr, naam, mailAdres, telefoonnummer, wachtwoord);
+    }
+
+    public void addIngevuldeLijst(Vragenlijst vragenlijst) {
         ingevuldeLijsten.add(vragenlijst);
-        System.out.println("Gelukt!");
-
     }
-
-    public String getName() {return naam;}
 }

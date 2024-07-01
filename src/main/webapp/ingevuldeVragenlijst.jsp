@@ -1,12 +1,15 @@
-<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
 <%@ page import="nl.hu.bep.shopping.model.Vraag" %>
 <%@ page import="nl.hu.bep.shopping.model.Vragenlijst" %>
+<%@ page import="nl.hu.bep.shopping.model.Gebruiker" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.List" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vragenlijst</title>
+    <title>Ingevulde Vragenlijst</title>
     <style>
         body {
             background-image: url("https://www.slagersvak.biz/images/featured_news/jumbo_1_1.jpg");
@@ -41,11 +44,6 @@
         }
         .center-aligned {
             text-align: center;
-        }
-        textarea {
-            resize: none;
-            max-width: 90%;
-            min-width: 200px;
         }
         .form-content {
             padding-left: 10%;
@@ -101,7 +99,6 @@
         }
         .star.disabled {
             pointer-events: none;
-            opacity: 0.5;
         }
     </style>
 </head>
@@ -109,11 +106,14 @@
 <%
     // Parameters ophalen
     String vragenlijstId = request.getParameter("id");
-    boolean viewOnly = request.getParameter("viewOnly") != null && request.getParameter("viewOnly").equals("true");
+    Boolean viewOnly = Boolean.valueOf(request.getParameter("viewOnly"));
 
-    // Haal vragenlijst op
-    Vragenlijst vragenlijst = Vragenlijst.getVragenlijstById(vragenlijstId);
-    if (vragenlijst == null) { %>
+    Gebruiker currentGebruiker = (Gebruiker) session.getAttribute("huidigeGebruiker");
+    if (currentGebruiker != null) {
+
+        // Haal vragenlijst op
+        Vragenlijst vragenlijst = currentGebruiker.getIngevuldeLijstById(vragenlijstId);
+        if (vragenlijst == null) { %>
 <p>"Vragenlijst niet gevonden." </p>
 <% } else {
     List<Vraag> questions = vragenlijst.getVragen();
@@ -130,23 +130,35 @@
             Wij proberen Uw feedback zo snel mogelijk te verwerken.</h4>
         <br><br>
         <div class="form-content">
-            <% int i = 0;
+            <%
+                int i = 0;
                 for (Vraag question : questions) {
                     i++;
+
+                    if (question.getVraagtype().equals("vijfSterren")) {
+                        int antwoord = Integer.parseInt(question.getAntwoord());
+            %>
+
+            <label for="vraag<%= i %>"><%= i %>. <%= question.getVraag() %></label><br>
+            <span id="star1_Q<%= i %>" class="star <%= antwoord >= 1 ? "one" : "" %> <%= viewOnly ? "disabled" : "" %>" >★</span>
+            <span id="star2_Q<%= i %>" class="star <%= antwoord >= 2 ? "two" : "" %> <%= viewOnly ? "disabled" : "" %>" >★</span>
+            <span id="star3_Q<%= i %>" class="star <%= antwoord >= 3 ? "three" : "" %> <%= viewOnly ? "disabled" : "" %>" >★</span>
+            <span id="star4_Q<%= i %>" class="star <%= antwoord >= 4 ? "four" : "" %> <%= viewOnly ? "disabled" : "" %>" >★</span>
+            <span id="star5_Q<%= i %>" class="star <%= antwoord == 5 ? "five" : "" %> <%= viewOnly ? "disabled" : "" %>" >★</span>
+            <script>gfg(<%= antwoord %>, <%= i %>)</script>
+            <input type="hidden" id="starRating<%= i %>" name="starRating<%= i %>" value="<%= antwoord %>">
+            <%
+            } else {
             %>
             <label for="vraag<%= i %>"><%= i %>. <%= question.getVraag() %></label><br>
-            <% if (question.getVraagtype().equals("vijfSterren")) { %>
-            <span id="star1_Q<%= i %>" class="star <%= viewOnly ? "disabled" : "" %>" onclick="gfg(1, <%= i %>)">★</span>
-            <span id="star2_Q<%= i %>" class="star <%= viewOnly ? "disabled" : "" %>" onclick="gfg(2, <%= i %>)">★</span>
-            <span id="star3_Q<%= i %>" class="star <%= viewOnly ? "disabled" : "" %>" onclick="gfg(3, <%= i %>)">★</span>
-            <span id="star4_Q<%= i %>" class="star <%= viewOnly ? "disabled" : "" %>" onclick="gfg(4, <%= i %>)">★</span>
-            <span id="star5_Q<%= i %>" class="star <%= viewOnly ? "disabled" : "" %>" onclick="gfg(5, <%= i %>)">★</span>
-            <input type="hidden" id="starRating<%= i %>" name="starRating<%= i %>" value="0">
-            <% } else { %>
-            <textarea id="vraag<%= i %>" name="vraag<%= i %>" rows="3" cols="50" <%= viewOnly ? "readonly" : "" %>></textarea>
-            <% } %>
+            <textarea id="vraag<%= i %>" name="vraag<%= i %>" rows="3" cols="50" <%= viewOnly ? "readonly" : "" %>><%= question.getAntwoord() %></textarea>
+            <%
+                }
+            %>
             <br><br>
-            <% } %>
+            <%
+                }
+            %>
         </div>
         <br><br>
         <div class="button-container">
@@ -154,8 +166,7 @@
             <label id="errorLabel"></label>
             <% if (!viewOnly) { %>
             <button type="submit" id="buttonJoin">afronden</button>
-            <% }
-            }%>
+            <% } %>
         </div>
     </form>
 </dialog>
@@ -187,19 +198,27 @@
                 else if (n == 2) star.className = "star two";
                 else if (n == 3) star.className = "star three";
                 else if (n == 4) star.className = "star four";
-                else if (n == 5) star.className = "star five";
+                else star.className = "star five";
+
+                star.innerHTML = "★";
             }
-            document.getElementById("starRating" + questionIndex).value = n; // Set the hidden input value
+            document.getElementById("starRating" + questionIndex).setAttribute("value", n)
         }
     }
 
     function remove(questionIndex) {
         for (let i = 1; i <= 5; i++) {
             let star = document.getElementById("star" + i + "_Q" + questionIndex);
-            star.className = "star " + (<%= request.getParameter("viewOnly") != null && request.getParameter("viewOnly").equals("true") ? "'disabled'" : "''" %>);
-
+            star.className = star.className.replace(/\b(one|two|three|four|five)\b/g, "");
+            star.innerHTML = "★";
         }
     }
 </script>
+
+<%
+        } }else {
+        response.sendRedirect("/inlogPagina.html");
+    }
+%>
 </body>
 </html>

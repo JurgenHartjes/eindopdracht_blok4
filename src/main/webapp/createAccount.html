@@ -2,13 +2,83 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Test</title>
+    <title>Create Account</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url("https://www.slagersvak.biz/images/featured_news/jumbo_1_1.jpg");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .custom-dialog {
+            background-color: #FCFBF2;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .custom-dialog h1 {
+            margin-top: 0;
+        }
+
+        .custom-dialog input {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+        }
+
+        .custom-dialog button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .custom-dialog button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-    <form>
-
-        <label>ingeleverd :))</label>
-
+<dialog class="custom-dialog" open>
+    <form method="post" action="/createAccount">
+        <h1>Create Account</h1>
+        <h2>Jumbo Foodmarkt Leidsche Rijn</h2>
+        <label for="userName">Name:</label><br>
+        <input type="text" id="userName" name="userName" required><br>
+        <label for="userMail">Email:</label><br>
+        <input type="email" id="userMail" name="userMail" required><br>
+        <label for="userPhone">Phone Number:</label><br>
+        <input type="tel" id="userPhone" name="userPhone" required><br>
+        <label for="userPassword">Password:</label><br>
+        <input type="password" id="userPassword" name="userPassword" required><br>
+        <label for="userConfirmPassword">Confirm Password:</label><br>
+        <input type="password" id="userConfirmPassword" name="userConfirmPassword" required><br>
+        <label for="userCustomerNumber">klantennummer:</label><br>
+        <input type="number" id="userCustomerNumber" name="userCustomerNumber" required><br>
+        <br>
+        <button type="submit" id="createAccountButton">Create Account</button>
+        <button type="button" id="cancelButton">Cancel</button>
+        <label id="errorLabel"></label>
     </form>
+</dialog>
+
+<script type="text/javascript">
+    document.getElementById("cancelButton").onclick = function () {
+        location.href = "/inlogPagina.html";  // Ensure this is correct and matches the servlet mapping for the login page
+    }
+</script>
 </body>
 </html>

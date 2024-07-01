@@ -6,6 +6,8 @@ import nl.hu.bep.shopping.model.Gebruiker;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -46,8 +48,9 @@ public class createAccount extends HttpServlet {
         File jsonFile = new File(getClass().getClassLoader().getResource("user.json").getFile());
         boolean userFound = false;
 
-        List<Gebruiker> users = mapper.readValue(jsonFile, new TypeReference<List<Gebruiker>>() {});
+        ArrayList<Gebruiker> users = Gebruiker.getAlleGebruikers();
         for (Gebruiker user : users) {
+            System.out.println("mailadres : " + user.getMailAdres());
             if (user.getMailAdres().equals(userMail)) {
                 userFound = true;
                 response.sendRedirect("accountExists.html");

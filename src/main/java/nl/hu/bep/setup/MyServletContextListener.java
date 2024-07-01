@@ -26,7 +26,7 @@ public class MyServletContextListener implements ServletContextListener {
 
         // Example: Sending an email during initialization
         String recipientEmail = "jurgenextra@gmail.com";
-        EmailService.sendEmail(recipientEmail);
+        //EmailService.sendEmail(recipientEmail);
     }
 
     @Override

@@ -93,10 +93,6 @@ public class Gebruiker implements Serializable {
         this.ingevuldeLijsten = ingevuldeLijsten;
     }
 
-    public Vragenlijst getIngevuldeLijst(int index) {
-        return ingevuldeLijsten.get(index);
-    }
-
     public Vragenlijst getIngevuldeLijstById(String ID) {
         for (Vragenlijst lijst : ingevuldeLijsten) {
             if (lijst.getId().equals(ID)) {

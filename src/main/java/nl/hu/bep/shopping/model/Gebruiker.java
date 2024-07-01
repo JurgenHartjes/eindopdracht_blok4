@@ -3,7 +3,7 @@ package nl.hu.bep.shopping.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import nl.hu.bep.shopping.database.Connect;
+import nl.hu.bep.shopping.database.ConnectGebruiker;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -134,8 +134,10 @@ public class Gebruiker implements Serializable {
 
     public void saveGebruiker() {
         System.out.println("Saving gebruiker: " + naam);
-        Connect.saveKlantToDatabase(klantenNr, naam, mailAdres, telefoonnummer, wachtwoord);
+        ConnectGebruiker.saveKlantToDatabase(klantenNr, naam, mailAdres, telefoonnummer, wachtwoord);
     }
+
+
 
     public void addIngevuldeLijst(Vragenlijst vragenlijst) {
         ingevuldeLijsten.add(vragenlijst);

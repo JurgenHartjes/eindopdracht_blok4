@@ -10,14 +10,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-public class Connect {
+public class ConnectGebruiker {
 
     public static void main(String[] args) {
-        saveKlantToDatabase(12345, "test", "johan@gmail.com", "123546", "ww");
     }
 
     public static void saveKlantToDatabase(int klantennr, String naam, String mailadres, String telefoonnummer, String wachtwoord) {
-        Connect dbConnect = new Connect();
+        ConnectGebruiker dbConnect = new ConnectGebruiker();
         Connection connection = dbConnect.connect();
         if (connection != null) {
             System.out.println("Connected to the PostgreSQL server successfully.");
@@ -27,7 +26,13 @@ public class Connect {
         }
     }
 
-    public Connection connect() {
+    public static void saveAlleGebruikersToDatabase(ArrayList<Gebruiker> gebruikers) {
+        for (Gebruiker gebruiker : Gebruiker.getAlleGebruikers())   {
+            saveKlantToDatabase(gebruiker.getKlantenNr(), gebruiker.getNaam(), gebruiker.getMailAdres(), gebruiker.getTelefoonnummer(), gebruiker.getWachtwoord());
+        }
+    }
+
+    public static Connection connect() {
         Connection conn = null;
         String url = "jdbc:postgresql://localhost:5432/Jumbo_vragenlijst_DB";
         String user = "postgres";
@@ -81,6 +86,7 @@ public class Connect {
     }
 
     private void updateGebruiker(Connection conn, int klantennr, String naam, String mailadres, String telefoonnummer, String wachtwoord) {
+        System.out.println("updating gebruiker.");
         String sql = "UPDATE gebruiker SET naam = ?, mailadres = ?, telefoonnummer = ?, wachtwoord = ? WHERE klantennr = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, naam);
@@ -89,15 +95,19 @@ public class Connect {
             stmt.setString(4, wachtwoord);
             stmt.setInt(5, klantennr);
 
+            System.out.println("updating gebruiker..");
+
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated > 0) {
                 System.out.println("Gebruiker updated successfully.");
             } else {
                 System.out.println("Failed to update Gebruiker with klantennr: " + klantennr);
             }
+            System.out.println("updating gebruiker...");
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
         }
+        System.out.println("updating gebruiker done!");
     }
 
     private void insertGebruiker(Connection conn, int klantennr, String naam, String mailadres, String telefoonnummer, String wachtwoord) {
@@ -120,7 +130,7 @@ public class Connect {
         }
     }
 
-    public ArrayList<Gebruiker> getAllGebruikers() {
+    public static ArrayList<Gebruiker> getAllGebruikers() {
         ArrayList<Gebruiker> gebruikers = new ArrayList<>();
         String sql = "SELECT klantennr, naam, mailadres, telefoonnummer, wachtwoord FROM gebruiker";
 
